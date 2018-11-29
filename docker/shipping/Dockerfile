@@ -1,7 +1,17 @@
+FROM maven:3.2-jdk-8 as builder
+
+WORKDIR /usr/src/mymaven
+# ADD pom.xml /usr/src/mymaven
+# RUN mvn  -Pdocker dependency:go-offline
+ADD . /usr/src/mymaven
+# RUN ls -lha
+# # -o is offline we pre-cache the packages before
+RUN mvn -B -DskipTests package 
+
 FROM weaveworksdemos/msd-java:jre-latest
 
 WORKDIR /usr/src/app
-COPY *.jar ./app.jar
+COPY --from=builder /usr/src/mymaven/target/*.jar ./app.jar
 
 RUN	chown -R ${SERVICE_USER}:${SERVICE_GROUP} ./app.jar
 
